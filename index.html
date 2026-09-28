@@ -622,6 +622,14 @@
       display: block;
     }
 
+    /* Après la prise de vue, le cadre et les éléments d'aperçu ne doivent plus
+       se superposer à la photo finale : ils sont déjà intégrés dans le canvas. */
+    .photo-overlay.photo-captured .photo-frame,
+    .photo-overlay.photo-captured .photo-title,
+    .photo-overlay.photo-captured .photo-monsters {
+      display: none;
+    }
+
     .photo-overlay video,
     .photo-overlay canvas {
       width: 100%;
@@ -2241,6 +2249,7 @@
       photoOverlay.setAttribute('aria-hidden', 'false');
       photoCanvas.style.display = 'none';
       photoVideo.style.display = 'block';
+      photoOverlay.classList.remove('photo-captured');
       takePhotoBtn.hidden = false;
       takePhotoBtn.disabled = true;
       takePhotoBtn.textContent = '📷 Préparation…';
@@ -2438,13 +2447,23 @@
         }
 
         const size = await renderSouvenirFromRaw();
+
+        // Après la prise de vue, l'écran doit montrer uniquement la photo prise.
+        // Le souvenir décoré reste dans photoBlob pour le partage, mais on affiche
+        // ici la photo brute afin qu'aucun titre, cadre ou texte ne se superpose.
+        const previewSource = await createImageBitmap(rawPhotoBlob, { imageOrientation: 'from-image' });
+        const previewCtx = photoCanvas.getContext('2d', { alpha: false });
+        previewCtx.clearRect(0, 0, photoCanvas.width, photoCanvas.height);
+        previewCtx.drawImage(previewSource, 0, 0, photoCanvas.width, photoCanvas.height);
+        previewSource.close?.();
+
         stopPhotoStream();
         photoVideo.style.display = 'none';
         photoCanvas.style.display = 'block';
+        photoOverlay.classList.add('photo-captured');
         takePhotoBtn.hidden = true;
         retakePhotoBtn.hidden = false;
         sharePhotoBtn.hidden = false;
-        showToast(`Photo HD créée : ${size.outputWidth} × ${size.outputHeight}`);
       } catch (error) {
         console.warn('Création de la photo impossible', error);
         showToast('Impossible de créer la photo. Réessaie.');
@@ -2458,6 +2477,7 @@
       photoBlob = null;
       photoCanvas.style.display = 'none';
       photoVideo.style.display = 'block';
+      photoOverlay.classList.remove('photo-captured');
       retakePhotoBtn.hidden = true;
       sharePhotoBtn.hidden = true;
       takePhotoBtn.hidden = false;
