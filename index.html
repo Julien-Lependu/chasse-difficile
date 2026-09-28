@@ -1224,14 +1224,25 @@
       position: absolute;
       top: 12px;
       right: 12px;
+      z-index: 10;
       width: 32px;
       height: 32px;
+      padding: 0;
       border: none;
       border-radius: 50%;
       background: rgba(255, 255, 255, .12);
       color: white;
       font-size: 16px;
       font-weight: 800;
+      line-height: 32px;
+      text-align: center;
+      cursor: pointer;
+      pointer-events: auto;
+      touch-action: manipulation;
+    }
+
+    .monster-card-close:hover {
+      background: rgba(255, 255, 255, .22);
     }
 
     .monster-card-emoji {
@@ -1492,7 +1503,7 @@
 
   <div class="capture-celebration" id="captureCelebration" aria-hidden="true">
     <div class="capture-celebration-card">
-      <button class="monster-card-close" id="captureCelebrationCloseBtn" aria-label="Fermer">✕</button>
+      <button type="button" class="monster-card-close" id="captureCelebrationCloseBtn" aria-label="Fermer">✕</button>
       <div class="celebration-kicker">🎉 Bravo ! 🎉</div>
       <div class="celebration-emoji" id="celebrationEmoji"></div>
       <div class="celebration-title">Monstre capturé !</div>
@@ -1505,7 +1516,7 @@
 
   <div class="monster-card-overlay" id="monsterCardOverlay" aria-hidden="true">
     <div class="monster-card">
-      <button class="monster-card-close" id="monsterCardCloseBtn" aria-label="Fermer">✕</button>
+      <button type="button" class="monster-card-close" id="monsterCardCloseBtn" aria-label="Fermer">✕</button>
       <div class="monster-card-emoji" id="monsterCardEmoji"></div>
       <div class="monster-card-name" id="monsterCardName"></div>
       <div class="monster-card-fact" id="monsterCardFact"></div>
@@ -1824,7 +1835,11 @@
       monsterCardOverlay.setAttribute('aria-hidden', 'true');
     }
 
-    document.getElementById('monsterCardCloseBtn').addEventListener('click', closeMonsterCard);
+    document.getElementById('monsterCardCloseBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeMonsterCard();
+    });
     monsterCardOverlay.addEventListener('click', (e) => {
       if (e.target === monsterCardOverlay) closeMonsterCard();
     });
@@ -1889,7 +1904,11 @@
       captureCelebration.setAttribute('aria-hidden', 'true');
     }
 
-    document.getElementById('captureCelebrationCloseBtn').addEventListener('click', closeCaptureCelebration);
+    document.getElementById('captureCelebrationCloseBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeCaptureCelebration();
+    });
 
     // ---- Radar, camera and capture logic ----
     const captureBtn = document.getElementById('captureBtn');
@@ -2221,7 +2240,7 @@
       photoVideo.style.display = 'block';
       takePhotoBtn.hidden = false;
       takePhotoBtn.disabled = true;
-      takePhotoBtn.textContent = '📷 Préparation HD…';
+      takePhotoBtn.textContent = '📷 Préparation…';
       sharePhotoBtn.hidden = true;
       retakePhotoBtn.hidden = true;
       photoBlob = null;
@@ -2259,7 +2278,7 @@
         });
 
         takePhotoBtn.disabled = false;
-        takePhotoBtn.textContent = '📷 Prendre la photo HD';
+        takePhotoBtn.textContent = '📷 Prendre la photo';
       } catch (error) {
         console.warn('Caméra selfie indisponible', error);
         showToast('Caméra selfie indisponible. Vérifie son autorisation.');
@@ -2329,9 +2348,42 @@
       ctx.shadowColor = 'rgba(0,0,0,.95)';
       ctx.shadowBlur = 10 * scale;
       ctx.shadowOffsetY = 3 * scale;
+
+      // En-tête : petit logo de l'association à côté du titre, en haut de la photo.
+      const titleFontSize = Math.round(48 * scale);
+      ctx.font = `${titleFontSize}px Creepster, cursive`;
+      const title = 'Chasseur de monstres';
+      const titleWidth = ctx.measureText(title).width;
+      const logoMaxWidth = outputWidth * 0.095;
+      const logoMaxHeight = 62 * scale;
+      let logoWidth = 0;
+      let logoHeight = 0;
+      if (associationLogoImage) {
+        const logoRatio = Math.min(
+          logoMaxWidth / associationLogoImage.width,
+          logoMaxHeight / associationLogoImage.height
+        );
+        logoWidth = associationLogoImage.width * logoRatio;
+        logoHeight = associationLogoImage.height * logoRatio;
+      }
+      const logoGap = 16 * scale;
+      const headerWidth = titleWidth + (logoWidth ? logoGap + logoWidth : 0);
+      const headerX = Math.max(20 * scale, (outputWidth - headerWidth) / 2);
+      const titleX = headerX + (logoWidth ? logoWidth + logoGap : 0);
+
       ctx.fillStyle = '#ffb35c';
-      ctx.font = `${Math.round(48 * scale)}px Creepster, cursive`;
-      ctx.fillText('Chasseur de monstres', outputWidth / 2, 78 * scale);
+      ctx.fillText(title, titleX + titleWidth / 2, 78 * scale);
+
+      if (associationLogoImage && logoWidth > 0 && logoHeight > 0) {
+        const logoX = headerX;
+        const logoY = 28 * scale;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,.75)';
+        ctx.shadowBlur = 7 * scale;
+        ctx.drawImage(associationLogoImage, logoX, logoY, logoWidth, logoHeight);
+        ctx.restore();
+      }
+
       ctx.fillStyle = '#ffffff';
       ctx.font = `800 ${Math.round(21 * scale)}px Nunito, sans-serif`;
       ctx.fillText('Halloween 2026 · 4/4 monstres', outputWidth / 2, 112 * scale);
@@ -2339,23 +2391,6 @@
       ctx.fillText('🎃  👻  🦇  🕷️  💀  🧛', outputWidth / 2, outputHeight - 54 * scale);
       ctx.shadowBlur = 0;
       ctx.shadowOffsetY = 0;
-
-      if (associationLogoImage) {
-        const maxLogoWidth = outputWidth * 0.22;
-        const maxLogoHeight = outputHeight * 0.12;
-        const logoRatio = Math.min(maxLogoWidth / associationLogoImage.width, maxLogoHeight / associationLogoImage.height);
-        const logoWidth = associationLogoImage.width * logoRatio;
-        const logoHeight = associationLogoImage.height * logoRatio;
-        const logoMargin = 20 * scale;
-        const logoX = outputWidth - logoWidth - logoMargin;
-        const logoY = outputHeight - logoHeight - logoMargin;
-
-        ctx.save();
-        ctx.shadowColor = 'rgba(0,0,0,.7)';
-        ctx.shadowBlur = 8 * scale;
-        ctx.drawImage(associationLogoImage, logoX, logoY, logoWidth, logoHeight);
-        ctx.restore();
-      }
 
       photoBlob = await new Promise((resolve, reject) => {
         canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Export impossible')), 'image/jpeg', 0.98);
@@ -2411,7 +2446,7 @@
         console.warn('Création de la photo impossible', error);
         showToast('Impossible de créer la photo. Réessaie.');
         takePhotoBtn.disabled = false;
-        takePhotoBtn.textContent = '📷 Prendre la photo HD';
+        takePhotoBtn.textContent = '📷 Prendre la photo';
       }
     }
 
@@ -2424,7 +2459,7 @@
       sharePhotoBtn.hidden = true;
       takePhotoBtn.hidden = false;
       takePhotoBtn.disabled = true;
-      takePhotoBtn.textContent = '📷 Préparation HD…';
+      takePhotoBtn.textContent = '📷 Préparation…';
 
       try {
         photoStream = await navigator.mediaDevices.getUserMedia({
@@ -2440,7 +2475,7 @@
         photoVideo.srcObject = photoStream;
         await photoVideo.play();
         takePhotoBtn.disabled = false;
-        takePhotoBtn.textContent = '📷 Prendre la photo HD';
+        takePhotoBtn.textContent = '📷 Prendre la photo';
       } catch (error) {
         console.warn(error);
         showToast('Impossible de rouvrir la caméra.');
