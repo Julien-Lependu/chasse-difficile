@@ -2448,15 +2448,11 @@
 
         const size = await renderSouvenirFromRaw();
 
-        // Après la prise de vue, l'écran doit montrer uniquement la photo prise.
-        // Le souvenir décoré reste dans photoBlob pour le partage, mais on affiche
-        // ici la photo brute afin qu'aucun titre, cadre ou texte ne se superpose.
-        const previewSource = await createImageBitmap(rawPhotoBlob, { imageOrientation: 'from-image' });
-        const previewCtx = photoCanvas.getContext('2d', { alpha: false });
-        previewCtx.clearRect(0, 0, photoCanvas.width, photoCanvas.height);
-        previewCtx.drawImage(previewSource, 0, 0, photoCanvas.width, photoCanvas.height);
-        previewSource.close?.();
-
+        // Après la prise de vue, on affiche directement le souvenir final
+        // rendu dans le canvas : photo + cadre + titre + logo + décorations.
+        // Les éléments de l'interface (cadre HTML, titre et monstres) sont masqués
+        // pour éviter tout chevauchement : tout ce qui doit apparaître sur la photo
+        // est déjà intégré au canvas.
         stopPhotoStream();
         photoVideo.style.display = 'none';
         photoCanvas.style.display = 'block';
