@@ -50,8 +50,10 @@
     header {
       padding: 14px 16px 10px;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       position: relative;
       z-index: 20;
       background: linear-gradient(180deg, rgba(18, 10, 34, 0.95), rgba(18, 10, 34, 0));
@@ -1196,6 +1198,111 @@
       font-weight: 800;
     }
 
+    /* ---- Lien "Mode d'emploi" et sa popup ---- */
+    .howto-link {
+      flex: 0 0 auto;
+      border: 1px solid rgba(143, 233, 79, .5);
+      border-radius: 999px;
+      padding: 6px 12px;
+      background: rgba(143, 233, 79, .1);
+      color: var(--toxic);
+      font-weight: 800;
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+
+    .howto-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(7, 3, 15, .82);
+      backdrop-filter: blur(7px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .2s ease, visibility .2s ease;
+    }
+
+    .howto-overlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .howto-card {
+      position: relative;
+      width: min(90vw, 420px);
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 28px 22px 24px;
+      border: 3px solid var(--toxic);
+      border-radius: 26px;
+      color: white;
+      background: linear-gradient(160deg, rgba(45, 27, 78, .98), rgba(18, 7, 33, .98));
+      box-shadow: 0 20px 70px rgba(0, 0, 0, .65), 0 0 30px rgba(143, 233, 79, .3);
+    }
+
+    .howto-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .12);
+      color: white;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .howto-card h2 {
+      margin: 0 0 14px;
+      font-family: 'Creepster', cursive;
+      font-weight: 400;
+      font-size: 28px;
+      color: var(--pumpkin);
+      text-shadow: 0 0 14px rgba(255, 138, 43, .5);
+      text-align: center;
+    }
+
+    .howto-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .howto-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .howto-step-icon {
+      flex: 0 0 auto;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      background: rgba(143, 233, 79, .15);
+      border: 1px solid rgba(143, 233, 79, .5);
+    }
+
+    .howto-step-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #e8def5;
+    }
+
+    .howto-step-text b {
+      color: var(--toxic);
+    }
+
     /* ---- Carnet du chasseur (fiche consultable) ---- */
     .monster-card-overlay {
       position: fixed;
@@ -1436,11 +1543,11 @@
   <div class="permission-blocker" id="blocker">
     <div class="home-kicker">Une aventure vous attend dans le parc</div>
     <h2>🎃 Chasse aux Monstres</h2>
-    <p class="home-subtitle">Autorise la géolocalisation et pars à la recherche des 4 monstres de test cachés dans le parc.</p>
+    <p class="home-subtitle">Autorise la géolocalisation et pars à la recherche des 12 monstres cachés dans le parc.</p>
 
     <div class="hunt-intro" aria-label="Comment fonctionne la chasse aux monstres ?">
       <h3>🌙 La chasse commence ici…</h3>
-      <p>On raconte que <strong>4 créatures mystérieuses</strong> se sont échappées et se cachent quelque part dans le parc. Elles ne se laisseront pas attraper facilement !</p>
+      <p>On raconte que <strong>12 créatures mystérieuses</strong> se sont échappées et se cachent quelque part dans le parc. Elles ne se laisseront pas attraper facilement !</p>
       <p>Ton radar va t’aider à suivre leurs traces. Promène-toi, rapproche-toi des créatures et sois attentif : lorsque tu seras au bon endroit, ton appareil te permettra de partir à leur recherche.</p>
 
       <ul class="hunt-steps">
@@ -1457,9 +1564,39 @@
     <button id="startBtn">C’est parti !</button>
   </div>
 
+  <div class="howto-overlay" id="howtoOverlay" aria-hidden="true">
+    <div class="howto-card" role="dialog" aria-modal="true" aria-labelledby="howtoTitle">
+      <button class="howto-close" id="howtoCloseBtn" aria-label="Fermer">✕</button>
+      <h2 id="howtoTitle">📖 Mode d'emploi</h2>
+      <div class="howto-steps">
+        <div class="howto-step">
+          <div class="howto-step-icon">🔎</div>
+          <div class="howto-step-text"><b>Trouve-les.</b> 12 créatures mystérieuses se cachent dans le parc. Promène-toi pour partir à leur recherche.</div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-step-icon">📡</div>
+          <div class="howto-step-text"><b>Suis le radar.</b> En bas de l'écran, la jauge se remplit à mesure que tu te rapproches du monstre le plus proche.</div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-step-icon">📷</div>
+          <div class="howto-step-text"><b>Repère-les avec la caméra.</b> Une fois assez proche, un bouton apparaît pour ouvrir la caméra et chercher le monstre autour de toi.</div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-step-icon">👆</div>
+          <div class="howto-step-text"><b>Tape sur le monstre</b> plusieurs fois quand il apparaît à l'écran pour le capturer.</div>
+        </div>
+        <div class="howto-step">
+          <div class="howto-step-icon">📖</div>
+          <div class="howto-step-text"><b>Découvre ses secrets.</b> Chaque monstre capturé rejoint ton sac — tape dessus à tout moment pour relire sa fiche.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <header>
     <h1 id="gameTitle">Chasse aux <span>Monstres</span></h1>
-    <div class="counter">🎃 <b id="caughtCount">0</b>/<span id="totalCount">4</span></div>
+    <button class="howto-link" id="howtoLink" type="button">📖 Mode d'emploi</button>
+    <div class="counter">🎃 <b id="caughtCount">0</b>/<span id="totalCount">12</span></div>
   </header>
 
   <div id="map"></div>
@@ -1537,7 +1674,7 @@
 
   <div class="win-overlay" id="winOverlay">
     <h2>Bravo, chasseur de monstres !</h2>
-    <p id="winText">Tu as attrapé les 4 monstres du test. Reviens voir les animateurs pour ta récompense 🍬</p>
+    <p id="winText">Tu as attrapé les 12 monstres. Reviens voir les animateurs pour ta récompense 🍬</p>
     <button id="openPhotoBtn">📸 Faire la photo souvenir</button>
     <button style="margin-top:10px;background:rgba(255,255,255,.13);color:white"
       onclick="document.getElementById('winOverlay').classList.remove('show')">Continuer à explorer</button>
@@ -1548,7 +1685,7 @@
     <canvas id="photoCanvas"></canvas>
     <div class="photo-frame"></div>
     <div class="photo-title">Chasseur de monstres<br><small
-        style="font-family:Nunito;font-size:16px;color:white">Halloween 2026 · 4/4</small></div>
+        style="font-family:Nunito;font-size:16px;color:white">Halloween 2026 · 12/12</small></div>
     <div class="photo-monsters">🎃 👻 🦇 🕷️ 💀 🧛</div>
     <div class="photo-actions">
       <button class="secondary" id="closePhotoBtn">Fermer</button>
@@ -1558,10 +1695,7 @@
     </div>
   </div>
 
-  <link href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
-  <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js"></script>
   <script>
     /* =========================================================================
        CONFIG À PERSONNALISER
@@ -1590,25 +1724,31 @@
     // différemment (ex: "association-logo.png").
     const ASSOCIATION_LOGO_URL = "logo.png";
 
-    // ================= TEST GPS =================
-    // Zone de test autour des 4 coordonnées fournies.
+    // Parc de la Solitude : contour précis relevé via geojson.io (11 points).
     const PARK_POLYGON = [
-      [47.890620, 1.824100],
-      [47.891030, 1.824100],
-      [47.891030, 1.824580],
-      [47.890620, 1.824580]
+      [47.8875383, 1.8418695],
+      [47.8873644, 1.8406007],
+      [47.8869321, 1.8407229],
+      [47.8868986, 1.8406044],
+      [47.886834, 1.8404358],
+      [47.8865148, 1.8408415],
+      [47.8868377, 1.8415787],
+      [47.8869023, 1.8415157],
+      [47.8870514, 1.8418491],
+      [47.8872079, 1.8418214],
+      [47.8872253, 1.841964],
     ];
 
-    // Centre de la zone de test.
+    // Centre moyen du polygone, utilisé pour centrer la carte.
     const CENTER = {
-      lat: 47.89082475,
-      lng: 1.82433900
+      lat: PARK_POLYGON.reduce((sum, point) => sum + point[0], 0) / PARK_POLYGON.length,
+      lng: PARK_POLYGON.reduce((sum, point) => sum + point[1], 0) / PARK_POLYGON.length
     };
 
     // Le radar commence à réagir à 5 m. La caméra est débloquée à 10 m.
     // Évite de descendre à 2 m : la précision GPS d'un téléphone peut varier.
-    const RADAR_RADIUS_M = 10;
-    const CAMERA_UNLOCK_RADIUS_M = 15;
+    const RADAR_RADIUS_M = 3;
+    const CAMERA_UNLOCK_RADIUS_M = 5;
     const MIN_DISTANCE_BETWEEN_MONSTERS_M = 12; // Le vrai contour du parc fait ~110m de large, les monstres peuvent être mieux espacés
 
     // Ajoute une petite anecdote/fait rigolo par monstre avec "fact" —
@@ -1704,23 +1844,19 @@
       return positions;
     }
 
-    // 4 positions GPS fournies pour le test.
-    const TEST_MONSTER_POSITIONS = [
-      { lat: 47.890845, lng: 1.824253 },
-      { lat: 47.890880, lng: 1.824369 },
-      { lat: 47.890806, lng: 1.824427 },
-      { lat: 47.890768, lng: 1.824307 }
-    ];
+    const monsterPositions = generateMonsterPositions(
+      MONSTER_TEMPLATES.length,
+      PARK_POLYGON
+    );
 
-    // On utilise les 4 premiers monstres avec les 4 positions GPS de test.
-    const MONSTERS = MONSTER_TEMPLATES.slice(0, 4).map((monster, index) => ({
+    const MONSTERS = MONSTER_TEMPLATES.map((monster, index) => ({
       id: "m" + index,
       name: monster.name,
       image: monster.image,
       emoji: monster.emoji,
       fact: monster.fact || '',
-      lat: TEST_MONSTER_POSITIONS[index].lat,
-      lng: TEST_MONSTER_POSITIONS[index].lng
+      lat: monsterPositions[index].lat,
+      lng: monsterPositions[index].lng
     }));
 
     /* =========================== FIN DE LA CONFIG =========================== */
@@ -1770,8 +1906,9 @@
 
     // ---- Map setup ----
     const map = L.map('map', { zoomControl: false }).setView([CENTER.lat, CENTER.lng], 18);
-    L.maplibreGL({
-      style: 'https://tiles.openfreemap.org/styles/liberty'
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
     }).addTo(map);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -2398,7 +2535,7 @@
 
       ctx.fillStyle = '#ffffff';
       ctx.font = `800 ${Math.round(21 * scale)}px Nunito, sans-serif`;
-      ctx.fillText('Halloween 2026 · 4/4 monstres', outputWidth / 2, 112 * scale);
+      ctx.fillText(`Halloween 2026 · ${MONSTERS.length}/${MONSTERS.length} monstres`, outputWidth / 2, 112 * scale);
       ctx.font = `${Math.round(45 * scale)}px sans-serif`;
       ctx.fillText('🎃  👻  🦇  🕷️  💀  🧛', outputWidth / 2, outputHeight - 54 * scale);
       ctx.shadowBlur = 0;
@@ -2446,6 +2583,7 @@
           });
         }
 
+        await associationLogoReady;
         const size = await renderSouvenirFromRaw();
 
         // Après la prise de vue, on affiche directement le souvenir final
@@ -2505,7 +2643,7 @@
       if (!photoBlob) return;
       const file = new File([photoBlob], 'photo-chasse-aux-monstres.jpg', { type: 'image/jpeg' });
       try {
-        if (navigator.canShare?.({ files: [file] })) await navigator.share({ title: 'Chasse aux Monstres', text: 'J’ai capturé les 4 monstres du test !', files: [file] });
+        if (navigator.canShare?.({ files: [file] })) await navigator.share({ title: 'Chasse aux Monstres', text: `J’ai capturé les ${MONSTERS.length} monstres !`, files: [file] });
         else {
           const link = document.createElement('a'); link.href = URL.createObjectURL(photoBlob); link.download = file.name; link.click();
           setTimeout(() => URL.revokeObjectURL(link.href), 1000);
@@ -2524,13 +2662,22 @@
     // CONFIG en haut du fichier) et appliqué à chaque photo souvenir, sans
     // aucune action des familles pendant l'événement.
     let associationLogoImage = null;
+    let associationLogoReady = Promise.resolve(null);
 
     (function loadAssociationLogo() {
       if (!ASSOCIATION_LOGO_URL) return;
-      const img = new Image();
-      img.onload = () => { associationLogoImage = img; };
-      img.onerror = () => { console.info('Logo association introuvable à', ASSOCIATION_LOGO_URL); };
-      img.src = ASSOCIATION_LOGO_URL;
+      associationLogoReady = new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => {
+          associationLogoImage = img;
+          resolve(img);
+        };
+        img.onerror = () => {
+          console.info('Logo association introuvable à', ASSOCIATION_LOGO_URL);
+          resolve(null);
+        };
+        img.src = ASSOCIATION_LOGO_URL;
+      });
     })();
 
 
@@ -2664,6 +2811,27 @@
     });
 
     document.getElementById('startBtn').addEventListener('click', startTracking);
+
+    // ---- Popup "Mode d'emploi" ----
+    const howtoLink = document.getElementById('howtoLink');
+    const howtoOverlay = document.getElementById('howtoOverlay');
+    const howtoCloseBtn = document.getElementById('howtoCloseBtn');
+
+    function openHowto() {
+      howtoOverlay.classList.add('show');
+      howtoOverlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeHowto() {
+      howtoOverlay.classList.remove('show');
+      howtoOverlay.setAttribute('aria-hidden', 'true');
+    }
+
+    howtoLink.addEventListener('click', openHowto);
+    howtoCloseBtn.addEventListener('click', closeHowto);
+    howtoOverlay.addEventListener('click', event => {
+      if (event.target === howtoOverlay) closeHowto();
+    });
   </script>
 </body>
 
